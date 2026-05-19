@@ -768,13 +768,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- 关闭按钮 -->
-            <button id="profileCloseBtn" class="profile-close-btn">
-                <svg viewBox="0 0 24 24">
-                    <path d="M19 6.41L17.59 4 12l-1.41 1.41-12-1.41L4 7 17.59L12 19l1.41-1.41L19 4 6.41z"/>
-                </svg>
-            </button>
         </div>
     </div>
 
@@ -929,33 +922,6 @@
             line-height: 1.8;
         }
 
-        .profile-close-btn {
-            position: absolute;
-            top: 40px;
-            right: 40px;
-            width: 50px;
-            height: 50px;
-            background-color: rgba(255, 253, 254, 0.2);
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-
-        .profile-close-btn:hover {
-            background-color: rgba(255, 253, 254, 0.4);
-            transform: rotate(90deg);
-        }
-
-        .profile-close-btn svg {
-            width: 28px;
-            height: 28px;
-            fill: #FFFDFE;
-        }
-
         /* 响应式 - 手机端 */
         @media (max-width: 768px) {
             .profile-nav {
@@ -1013,13 +979,6 @@
             .profile-text {
                 font-size: 16px;
             }
-
-            .profile-close-btn {
-                top: 20px;
-                right: 20px;
-                width: 40px;
-                height: 40px;
-            }
         }
 
         /* 响应式 - 平板端 */
@@ -1035,7 +994,6 @@
         const profileOverlay = document.getElementById('profileOverlay');
         const profileTabs = document.querySelectorAll('.profile-tab');
         const profileContents = document.querySelectorAll('.profile-content');
-        const profileCloseBtn = document.getElementById('profileCloseBtn');
 
         // 打开界面
         function openProfileOverlay() {
@@ -1068,11 +1026,6 @@
                 console.log('01卡片被点击');
                 openProfileOverlay();
             });
-        }
-
-        // 关闭界面
-        if (profileCloseBtn) {
-            profileCloseBtn.addEventListener('click', closeProfileOverlay);
         }
 
         // 点击背景关闭
