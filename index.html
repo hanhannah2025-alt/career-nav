@@ -942,16 +942,16 @@
                                 <p class="detail-title">· 长期记忆</p>
                             </div>
                             <div class="portfolio-preview">
-                                <div class="portfolio-placeholder"></div>
+                                <img src="images/沈亦宸.png" alt="沈亦宸" style="width: 100%; border-radius: 12px; cursor: pointer;" onclick="event.stopPropagation(); document.getElementById('lightboxImg').src=this.src; document.getElementById('imageLightbox').style.display='flex';">
                             </div>
                         </div>
                         <div class="portfolio-breakdown">
                             <h3>业务拆解</h3>
-                            <div class="portfolio-placeholder" style="height: 500px;"></div>
+                            <img src="images/情绪陪伴智能体.jpg" alt="业务拆解" style="width: 100%; border-radius: 12px; cursor: pointer;" onclick="event.stopPropagation(); document.getElementById('lightboxImg').src=this.src; document.getElementById('imageLightbox').style.display='flex';">
                         </div>
                         <div class="portfolio-breakdown">
                             <h3>工作流</h3>
-                            <div class="portfolio-placeholder" style="height: 500px;"></div>
+                            <img src="images/intimate_coversition_flow__2_1.jpeg" alt="工作流" style="width: 100%; border-radius: 12px; cursor: pointer;" onclick="event.stopPropagation(); document.getElementById('lightboxImg').src=this.src; document.getElementById('imageLightbox').style.display='flex';">
                         </div>
                     </div>
                 </div>
@@ -1010,7 +1010,7 @@
                         </div>
                         <div class="portfolio-breakdown">
                             <h3>工作流</h3>
-                            <div class="portfolio-placeholder" style="height: 500px;"></div>
+                            <img src="images/customer_service.jpeg" alt="工作流" style="width: 100%; border-radius: 12px; cursor: pointer;" onclick="event.stopPropagation(); document.getElementById('lightboxImg').src=this.src; document.getElementById('imageLightbox').style.display='flex';">
                         </div>
                     </div>
                 </div>
@@ -1689,14 +1689,9 @@
             imageLightbox.style.display = 'flex';
         }
 
-        function closeLightbox() {
-            imageLightbox.style.display = 'none';
-            lightboxImg.src = '';
-        }
-
         // 点击作品一览中的图片放大
         if (portfolioOverlay) {
-            portfolioOverlay.addEventListener('click', (e) => {
+            portfolioOverlay.addEventListener('click', function(e) {
                 if (e.target.tagName === 'IMG') {
                     e.stopPropagation();
                     openLightbox(e.target.src);
@@ -1706,20 +1701,13 @@
 
         // 点击个人简介中的图片放大
         if (profileOverlay) {
-            profileOverlay.addEventListener('click', (e) => {
+            profileOverlay.addEventListener('click', function(e) {
                 if (e.target.tagName === 'IMG') {
                     e.stopPropagation();
                     openLightbox(e.target.src);
                 }
             });
         }
-
-        // 点击灯箱关闭
-        imageLightbox.addEventListener('click', (e) => {
-            if (e.target !== lightboxImg) {
-                closeLightbox();
-            }
-        });
     </script>
 
     <div id="imageLightbox" class="image-lightbox" style="display:none;" onclick="this.style.display='none'; document.getElementById('lightboxImg').src='';">
