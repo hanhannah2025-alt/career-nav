@@ -13,11 +13,11 @@
 
         body {
             font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
-            background-color: #E06336;
+            background-color: #000000;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            color: #FF5E48;
+            color: #FAF8F5;
         }
 
         /* 导航栏 */
@@ -55,7 +55,7 @@
         nav a:hover,
         nav a.active {
             transform: translateY(-2px);
-            background: #000000;
+            background: #E06336;
             border-radius: 8px;
             padding: 5px 12px;
         }
@@ -114,7 +114,7 @@
         .arrow-btn svg {
             width: 64px;
             height: 64px;
-            fill: #000000;
+            fill: #E06336;
         }
 
         .arrow-btn.left {
@@ -209,7 +209,7 @@
         }
 
         .indicator.active {
-            background: #000000;
+            background: #E06336;
             transform: scale(1.2);
         }
 
@@ -261,7 +261,7 @@
             top: 40px;
             left: 40px;
             font-size: 96px;
-            color: #000000;
+            color: #FAF8F5;
             font-weight: bold;
             letter-spacing: 2px;
             line-height: 1;
@@ -273,7 +273,7 @@
             right: 40px;
             top: 40px;
             font-size: 32px;
-            color: #000000;
+            color: #FAF8F5;
             font-weight: bold;
             letter-spacing: 4px;
             writing-mode: vertical-rl;
@@ -1111,7 +1111,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #E06336;
+            background-color: #000000;
             z-index: 200;
             display: flex;
             flex-direction: column;
@@ -1176,7 +1176,7 @@
         .profile-nav-links a:hover,
         .profile-nav-links a.active {
             transform: translateY(-2px);
-            background: #000000;
+            background: #E06336;
             border-radius: 8px;
             padding: 5px 12px;
         }
@@ -1237,7 +1237,27 @@
         }
 
         .profile-tab.active {
-            background-color: #000000;
+            background-color: #E06336;
+        }
+
+        /* 作品一览标签样式 */
+        #portfolioOverlay .profile-tab,
+        #profileOverlay .profile-tab {
+            background-color: #BABABA;
+            color: #000000;
+            font-weight: bold;
+        }
+
+        #portfolioOverlay .profile-tab:hover,
+        #profileOverlay .profile-tab:hover {
+            background-color: #E06336;
+            color: #FFFDFE;
+        }
+
+        #portfolioOverlay .profile-tab.active,
+        #profileOverlay .profile-tab.active {
+            background-color: #E06336;
+            color: #FFFDFE;
         }
 
         .profile-content-wrapper {
@@ -1272,7 +1292,7 @@
 
         .profile-section h2 {
             font-size: 32px;
-            color: #000000;
+            color: #FAF8F5;
             margin-bottom: 20px;
             margin-top: 0;
             font-weight: bold;
@@ -1287,7 +1307,7 @@
 
         .profile-text {
             font-size: 18px;
-            color: #000000;
+            color: #FAF8F5;
             line-height: 1.8;
         }
 
@@ -1301,7 +1321,7 @@
         }
 
         .about-card {
-            background: #000000;
+            background: #E06336;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 253, 254, 0.3);
             border-radius: 12px;
@@ -1311,7 +1331,7 @@
         }
 
         .about-card:hover {
-            background: #000000;
+            background: #E06336;
             transform: translateY(-5px);
         }
 
@@ -1347,8 +1367,7 @@
             left: 6px;
             top: 7px;
             bottom: 7px;
-            width: 2px;
-            background-color: #000000;
+            border-left: 2px dashed #E06336;
         }
 
         .timeline-item {
@@ -1362,10 +1381,11 @@
         .timeline-dot {
             width: 14px;
             height: 14px;
-            background-color: #000000;
+            background-color: #E06336;
             border-radius: 50%;
             flex-shrink: 0;
             margin-right: 20px;
+            margin-top: 5px;
         }
 
         .timeline-content {
@@ -1377,21 +1397,21 @@
         .timeline-title {
             font-size: 22px;
             font-weight: bold;
-            color: #000000;
+            color: #FAF8F5;
             margin-bottom: 8px;
             text-align: left;
         }
 
         .timeline-date {
             font-size: 16px;
-            color: #000000;
+            color: #FAF8F5;
             margin-bottom: 8px;
             text-align: left;
         }
 
         .timeline-desc {
             font-size: 16px;
-            color: #000000;
+            color: #FAF8F5;
             opacity: 0.9;
             text-align: left;
         }
@@ -1408,14 +1428,14 @@
         .detail-title {
             font-size: 18px;
             font-weight: bold;
-            color: #000000;
+            color: #FAF8F5;
             margin-bottom: 5px;
             text-align: left;
         }
 
         .detail-desc {
             font-size: 16px;
-            color: #000000;
+            color: #FAF8F5;
             opacity: 0.9;
             line-height: 1.6;
             text-align: left;
@@ -1446,7 +1466,7 @@
 
         .achievement-label {
             font-size: 14px;
-            color: #000000;
+            color: #FAF8F5;
             text-align: center;
             opacity: 0.9;
         }
@@ -1503,7 +1523,7 @@
 
             .profile-section h2 {
                 font-size: 24px;
-                color: #000000;
+                color: #FAF8F5;
             }
 
             .profile-text {
@@ -1532,7 +1552,7 @@
 
         .portfolio-info h2 {
             font-size: 32px;
-            color: #000000;
+            color: #FAF8F5;
             margin-bottom: 20px;
             margin-top: 0;
             font-weight: bold;
@@ -1541,7 +1561,7 @@
         .portfolio-label {
             font-size: 18px;
             font-weight: bold;
-            color: #000000;
+            color: #FAF8F5;
             margin-bottom: 8px;
             margin-top: 15px;
             text-align: left;
@@ -1550,14 +1570,14 @@
         .portfolio-info .detail-title {
             font-size: 18px;
             font-weight: bold;
-            color: #000000;
+            color: #FAF8F5;
             margin-bottom: 5px;
             text-align: left;
         }
 
         .portfolio-info .detail-desc {
             font-size: 16px;
-            color: #000000;
+            color: #FAF8F5;
             opacity: 0.9;
             line-height: 1.6;
             text-align: left;
@@ -1572,7 +1592,7 @@
         .portfolio-placeholder {
             width: 100%;
             height: 400px;
-            background: #000000;
+            background: #E06336;
             border-radius: 12px;
         }
 
@@ -1582,7 +1602,7 @@
             justify-content: center;
             height: 48px;
             padding: 5px 24px;
-            background-color: #000000;
+            background-color: #E06336;
             color: #FFFDFE;
             font-size: 18px;
             font-weight: 500;
@@ -1595,7 +1615,7 @@
         }
 
         .usage-link:hover {
-            background-color: #000000;
+            background-color: #E06336;
         }
 
         .portfolio-breakdown {
@@ -1605,7 +1625,7 @@
         .portfolio-breakdown h3 {
             font-size: 22px;
             font-weight: bold;
-            color: #000000;
+            color: #FAF8F5;
             margin-bottom: 15px;
         }
 
@@ -1672,7 +1692,7 @@
         .contact-icon {
             width: 80px;
             height: 80px;
-            background-color: #000000;
+            background-color: #E06336;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -1682,13 +1702,13 @@
         .contact-text {
             font-size: 20px;
             font-weight: bold;
-            color: #000000;
+            color: #FAF8F5;
             letter-spacing: 1px;
         }
 
         .skill-tag {
             display: inline-block;
-            background-color: #000000;
+            background-color: #E06336;
             color: #FFFDFE;
             font-size: 16px;
             font-weight: 500;
