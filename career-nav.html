@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>职途导航 - AI驱动的求职助手</title>
+    <style>
+        :root {
+            --bg: #FAF8F5;
+            --text: #000000;
+            --accent: #0B57D0;
+            --sidebar-width: 200px;
+            --sidebar-gap: 50px;
+            --font-size: 16px;
+            --right-panel-width: 380px;
+            --border: #E5E0DA;
+            --text-secondary: #666666;
+            --text-tertiary: #999999;
+            --success: #2E7D32;
+            --warning: #E67E22;
+            --danger: #C62828;
+            --surface: #FFFFFF;
+            --hover-bg: #F0EDE8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            font-size: var(--font-size);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* ======== 左侧边栏 ======== */
+        .sidebar {
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            padding: 40px 0;
+            border-right: 1px solid var(--border);
+            z-index: 10;
+        }
+
+        .sidebar-logo {
+            padding: 0 24px;
+            margin-bottom: 60px;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-logo .logo-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: var(--sidebar-gap);
+            padding: 0 16px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-size: 14px;
+            color: var(--text);
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+            font-family: inherit;
+            position: relative;
+        }
+
+        .nav-item svg {
+            width: 22px;
+            height: 22px;
+            flex-shrink: 0;
+            transition: all 0.25s ease;
+        }
+
+        .nav-item svg path,
+        .nav-item svg line,
+        .nav-item svg circle,
+        .nav-item svg rect,
+        .nav-item svg polyline {
+            stroke: var(--text);
+            transition: stroke 0.25s ease;
+        }
+
+        .nav-item:hover {
+            background: rgba(11, 87, 208, 0.12);
+        }
+
+        .nav-item:hover svg path,
+        .nav-item:hover svg line,
+        .nav-item:hover svg circle,
+        .nav-item:hover svg rect,
+        .nav-item:hover svg polyline {
+            stroke: var(--accent);
+        }
+
+        .nav-item:hover .nav-label {
+            color: var(--accent);
+        }
+
+        .nav-item.active {
+            background: var(--accent);
+        }
+
+        .nav-item.active svg path,
+        .nav-item.active svg line,
+        .nav-item.active svg circle,
+        .nav-item.active svg rect,
+        .nav-item.active svg polyline {
+            stroke: #FFFFFF;
+        }
+
+        .nav-item.active .nav-label {
+            color: #FFFFFF;
+        }
+
+        .nav-label {
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            white-space: nowrap;
+            transition: color 0.25s ease;
+        }
+
+        /* ======== 主内容区 ======== */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            min-width: 0;
+        }
+
+        /* ======== 中间区域 ======== */
+        .center-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 40px;
+        }
+
+        /* ======== 右侧面板 ======== */
+        .right-panel {
+            width: var(--right-panel-width);
+            min-width: var(--right-panel-width);
+            height: 100vh;
+            background: var(--surface);
+            border-left: 1px solid var(--border);
+            overflow-y: auto;
+            padding: 40px 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .panel-section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        /* ======== 上传区域 ======== */
+        .upload-zone.dual-upload {
+            flex-direction: row;
+            padding: 40px 24px;
+            gap: 0;
+            cursor: default;
+        }
+
+        .dual-upload-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            cursor: pointer;
+            padding: 12px;
+            border-radius: 12px;
+            transition: background 0.2s ease;
+        }
+
+        .dual-upload-divider {
+            width: 1px;
+            background: #E5E0DA;
+            align-self: stretch;
+            margin: 8px 0;
+        }
+
+        .upload-zone {
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            background: var(--surface);
+            text-align: center;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--accent);
+            background: rgba(11, 87, 208, 0.02);
+        }
+
+        .upload-zone.uploaded {
+            border-color: var(--accent);
+            background: rgba(11, 87, 208, 0.03);
+        }
+
+        .upload-icon-circle {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: 2px solid #D0CBC5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.25s ease;
+        }
+
+        .upload-zone:hover .upload-icon-circle {
+            border-color: var(--accent);
+        }
+
+        .upload-zone.uploaded .upload-icon-circle {
+            border-color: var(--accent);
+            background: rgba(11, 87, 208, 0.08);
+        }
+
+        .upload-text {
+            font-size: 16px;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+        }
+
+        .upload-hint {
+            font-size: 13px;
+            color: var(--text-tertiary);
+        }
+
+        .upload-file-name {
+            font-size: 15px;
+            color: var(--accent);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ======== 对话区域 ======== */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--surface);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .chat-message {
+            display: flex;
+            gap: 14px;
+            max-width: 85%;
+        }
+
+        .chat-message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .chat-message.ai {
+            align-self: flex-start;
+        }
+
+        .chat-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .chat-message.ai .chat-avatar {
+            background: rgba(11, 87, 208, 0.1);
+            color: var(--accent);
+        }
+
+        .chat-message.user .chat-avatar {
+            background: #F0EDE8;
+            color: var(--text);
+        }
+
+        .chat-bubble {
+            padding: 14px 20px;
+            border-radius: 18px;
+            font-size: 16px;
+            line-height: 1.7;
+            letter-spacing: 0.3px;
+        }
+
+        .chat-message.ai .chat-bubble {
+            background: #F5F3EF;
+            color: var(--text);
+            border-top-left-radius: 4px;
+        }
+
+        .chat-message.user .chat-bubble {
+            background: var(--accent);
+            color: #FFFFFF;
+            border-top-right-radius: 4px;
+        }
+
+        .chat-input-area {
+            border-top: 1px solid var(--border);
+            padding: 20px 24px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 18px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: none;
+            outline: none;
+            background: var(--bg);
+            color: var(--text);
+            transition: border-color 0.25s ease;
+        }
+
+        .chat-input:focus {
+            border-color: var(--accent);
+        }
+
+        .chat-input::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .chat-send-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: none;
+            background: var(--accent);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.25s ease;
+            flex-shrink: 0;
+        }
+
+        .chat-send-btn:hover {
+            opacity: 0.88;
+            transform: scale(1.04);
+        }
+
+        .chat-send-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* ======== 匹配度分值 ======== */
+        .match-score-section {
+            text-align: center;
+            padding: 8px 0;
+        }
+
+        .match-score-ring {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .match-score-inner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .match-score-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: -0.5px;
+            line-height: 1;
+        }
+
+        .match-score-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+        }
+
+        .match-score-ring svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .match-score-ring .bg-circle {
+            fill: none;
+            stroke: #F0EDE8;
+            stroke-width: 8;
+        }
+
+        .match-score-ring .fg-circle {
+            fill: none;
+            stroke: var(--accent);
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.8s ease;
+        }
+
+        /* ======== 要素对比列表 ======== */
+        .compare-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .compare-item {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #F0EDE8;
+        }
+
+        .compare-item:last-child {
+            border-bottom: none;
+        }
+
+        .compare-label {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .compare-detail {
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-align: right;
+            line-height: 1.5;
+            white-space: nowrap;
+        }
+
+        .compare-detail.skills {
+            white-space: normal;
+        }
+
+        .skill-pair {
+            display: inline-block;
+            white-space: nowrap;
+            margin-right: 2px;
+        }
+
+        .match-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+
+        .match-status.full {
+            background: rgba(46, 125, 50, 0.1);
+            color: var(--success);
+        }
+
+        .match-status.partial {
+            background: rgba(230, 126, 34, 0.1);
+            color: var(--warning);
+        }
+
+        .match-status.missing {
+            background: rgba(198, 40, 40, 0.08);
+            color: var(--danger);
+        }
+
+        /* ======== 优化建议 ======== */
+        .suggestion-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .suggestion-item {
+            padding: 14px 16px;
+            border-radius: 10px;
+            border-left: 3px solid;
+            background: var(--bg);
+        }
+
+        .suggestion-item.danger {
+            border-left-color: var(--danger);
+        }
+
+        .suggestion-item.warning {
+            border-left-color: var(--warning);
+        }
+
+        .suggestion-item.info {
+            border-left-color: var(--accent);
+        }
+
+        .suggestion-tag {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .suggestion-item.danger .suggestion-tag {
+            color: var(--danger);
+        }
+
+        .suggestion-item.warning .suggestion-tag {
+            color: var(--warning);
+        }
+
+        .suggestion-item.info .suggestion-tag {
+            color: var(--accent);
+        }
+
+        .suggestion-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* ======== Offer对比表格 ======== */
+        .offer-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .offer-table th {
+            text-align: left;
+            padding: 12px 14px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border);
+            white-space: nowrap;
+        }
+
+        .offer-table td {
+            padding: 14px;
+            border-bottom: 1px solid #F0EDE8;
+            color: var(--text);
+            line-height: 1.5;
+            white-space: nowrap;
+        }
+
+        .offer-table .dimension {
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        .offer-highlight {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .offer-highlight.best {
+            background: rgba(11, 87, 208, 0.1);
+            color: var(--accent);
+        }
+
+        .offer-highlight.warn {
+            background: rgba(230, 126, 34, 0.1);
+            color: var(--warning);
+        }
+
+        /* ======== 简历优化呈现区 ======== */
+        .resume-preview {
+            background: var(--surface);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            padding: 32px;
+            margin-top: 24px;
+        }
+
+        .resume-preview h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .resume-preview .jd-title {
+            font-size: 15px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .resume-section-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--accent);
+            margin-top: 24px;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .resume-highlight-diff {
+            background: rgba(11, 87, 208, 0.06);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+
+        .resume-original {
+            text-decoration: line-through;
+            color: var(--text-tertiary);
+            margin-right: 8px;
+        }
+
+        .resume-improved {
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        /* ======== 紧凑上传区（右侧面板用） ======== */
+        .compact-upload {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .compact-upload:hover {
+            border-color: var(--accent);
+            background: rgba(11, 87, 208, 0.02);
+        }
+
+        /* ======== 模块容器 ======== */
+        .module {
+            display: none;
+            flex: 1;
+            height: 100vh;
+        }
+
+        .module.active {
+            display: flex;
+        }
+
+        .module-body {
+            display: flex;
+            flex: 1;
+            height: 100vh;
+            min-width: 0;
+        }
+
+        /* ======== 分隔线 ======== */
+        .divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 4px 0;
+        }
+
+        .divider-label {
+            font-size: 13px;
+            color: var(--text-tertiary);
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        /* ======== 滚动条 ======== */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #D0CBC5;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #BAB5AE;
+        }
+
+        /* ======== 加载动画 ======== */
+        @keyframes bounce {
+            0%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-6px); }
+        }
+
+        /* ======== 过渡动画 ======== */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .module.active .center-area > *,
+        .module.active .right-panel > * {
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        /* ======== 响应式 ======== */
+        @media (max-width: 1200px) {
+            .right-panel {
+                width: 320px;
+                min-width: 320px;
+            }
+            :root {
+                --right-panel-width: 320px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                min-width: 100%;
+                height: auto;
+                flex-direction: row;
+                padding: 16px;
+                gap: 8px;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                overflow-x: auto;
+            }
+
+            .sidebar-logo {
+                margin-bottom: 0;
+                margin-right: 16px;
+                font-size: 18px;
+            }
+
+            .sidebar-nav {
+                flex-direction: row;
+                gap: 8px;
+                padding: 0;
+            }
+
+            .nav-item {
+                padding: 8px 14px;
+                font-size: 14px;
+                white-space: nowrap;
+            }
+
+            .nav-item svg {
+                width: 18px;
+                height: 18px;
+            }
+
+            .nav-label {
+                font-size: 14px;
+            }
+
+            .module-body {
+                flex-direction: column;
+            }
+
+            .center-area {
+                padding: 20px;
+            }
+
+            .right-panel {
+                width: 100%;
+                min-width: 100%;
+                height: auto;
+                max-height: 50vh;
+                border-left: none;
+                border-top: 1px solid var(--border);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ======== 左侧边栏 ======== -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <span class="logo-dot"></span>
+            职途导航
+        </div>
+        <nav class="sidebar-nav">
+            <button class="nav-item active" data-module="0">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                    <polyline points="10 9 9 9 8 9"/>
+                </svg>
+                <span class="nav-label">简历匹配优化</span>
+            </button>
+            <button class="nav-item" data-module="1">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    <line x1="9" y1="10" x2="15" y2="10"/>
+                    <line x1="12" y1="7" x2="12" y2="13"/>
+                </svg>
+                <span class="nav-label">面试问答预测</span>
+            </button>
+            <button class="nav-item" data-module="2">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <polyline points="17 10 12 5 7 10"/>
+                    <polyline points="7 14 12 19 17 14"/>
+                </svg>
+                <span class="nav-label">Offer 对比</span>
+            </button>
+        </nav>
+    </aside>
+
+    <!-- ======== 模块1：简历匹配优化 ======== -->
+    <div class="module active" id="module-0">
+        <div class="module-body">
+            <!-- 中间区域 -->
+            <div class="center-area">
+                <div class="upload-zone dual-upload">
+                    <div class="dual-upload-item">
+                        <div class="upload-icon-circle">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0B57D0" stroke-width="2" stroke-linecap="round">
+                                <line x1="12" y1="5" x2="12" y2="19"/>
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                        </div>
+                        <span class="upload-text">点击上传简历 (PDF)</span>
+                    </div>
+                    <div class="dual-upload-divider"></div>
+                    <div class="dual-upload-item">
+                        <div class="upload-icon-circle">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0B57D0" stroke-width="2" stroke-linecap="round">
+                                <line x1="12" y1="5" x2="12" y2="19"/>
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                        </div>
+                        <span class="upload-text">点击上传岗位JD (图片/PDF)</span>
+                    </div>
+                </div>
+
+                <!-- 简历优化预览 -->
+                <div class="resume-preview" id="resumePreview" style="display:none;">
+                    <h3>优化后简历预览</h3>
+                    <p class="jd-title" id="resumePreviewTitle"></p>
+                    <div id="resumePreviewContent" style="font-size:16px;line-height:1.8;color:var(--text);"></div>
+                </div>
+            </div>
+
+            <!-- 右侧面板 -->
+            <div class="right-panel">
+                <!-- 匹配度分值 -->
+                <div class="match-score-section">
+                    <p class="panel-section-title" style="text-align:center;">匹配度</p>
+                    <div class="match-score-ring">
+                        <svg viewBox="0 0 140 140">
+                            <circle class="bg-circle" cx="70" cy="70" r="60"/>
+                            <circle id="scoreFgCircle" class="fg-circle" cx="70" cy="70" r="60"
+                                stroke-dasharray="377"
+                                stroke-dashoffset="377"/>
+                        </svg>
+                        <div class="match-score-inner">
+                            <span class="match-score-value" id="scoreValue">--</span>
+                            <span class="match-score-label" id="scoreLabel">等待分析</span>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="divider">
+
+                <!-- 显性要素列表 -->
+                <div>
+                    <p class="panel-section-title">要素对比</p>
+                    <div class="compare-list" id="compareList">
+                        <div class="compare-item">
+                            <span class="compare-label">学历</span>
+                            <div style="text-align:right;color:var(--text-tertiary);">上传简历后自动分析</div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="divider">
+
+                <!-- 优化建议 -->
+                <div>
+                    <p class="panel-section-title">优化建议</p>
+                    <div class="suggestion-list" id="suggestionList">
+                        <div style="font-size:14px;color:var(--text-tertiary);text-align:center;padding:20px;">上传简历后自动生成建议</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======== 模块2：面试问答预测 ======== -->
+    <div class="module" id="module-1">
+        <div class="module-body">
+            <!-- 中间区域：对话 -->
+            <div class="center-area" style="padding:24px;">
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages1">
+                        <div class="chat-message ai">
+                            <div class="chat-avatar">AI</div>
+                            <div class="chat-bubble">
+                                你好！我是你的AI面试教练。请上传你的<strong>简历</strong>和<strong>目标岗位JD</strong>到右侧面板，我将为你生成针对性的模拟面试题。<br><br>你也可以直接告诉我目标岗位，我们可以立即开始练习。
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chat-input-area">
+                        <textarea class="chat-input" placeholder="输入你的回答..." rows="1" id="chatInput1"></textarea>
+                        <button class="chat-send-btn" onclick="sendMessage(1)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round">
+                                <line x1="12" y1="19" x2="12" y2="5"/>
+                                <polyline points="5 12 12 5 19 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧面板：上传区域 -->
+            <div class="right-panel">
+                <div>
+                    <p class="panel-section-title">简历上传</p>
+                    <div class="compact-upload" id="uploadInterviewResume" style="margin-top:8px;">
+                        <div class="upload-icon-circle" style="width:40px;height:40px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0B57D0" stroke-width="2" stroke-linecap="round">
+                                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                        </div>
+                        <span class="upload-text" style="font-size:14px;">点击上传简历 (PDF)</span>
+                    </div>
+                </div>
+
+                <div>
+                    <p class="panel-section-title">岗位JD上传</p>
+                    <div class="compact-upload" id="uploadInterviewJD" style="margin-top:8px;">
+                        <div class="upload-icon-circle" style="width:40px;height:40px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0B57D0" stroke-width="2" stroke-linecap="round">
+                                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                        </div>
+                        <span class="upload-text" style="font-size:14px;">点击上传岗位JD (图片/PDF)</span>
+                    </div>
+                </div>
+
+                <hr class="divider">
+
+                <div>
+                    <p class="panel-section-title">面试信息</p>
+                    <div style="font-size:14px;color:var(--text-secondary);line-height:2;margin-top:8px;">
+                        <div style="display:flex;justify-content:space-between;">
+                            <span style="white-space:nowrap;">目标公司</span><span style="color:var(--text);font-weight:500;white-space:nowrap;">字节跳动</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;">
+                            <span style="white-space:nowrap;">目标岗位</span><span style="color:var(--text);font-weight:500;white-space:nowrap;">高级产品经理</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;">
+                            <span style="white-space:nowrap;">面试轮次</span><span style="color:var(--text);font-weight:500;white-space:nowrap;">一面 · 业务面</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;">
+                            <span style="white-space:nowrap;">已练习</span><span style="color:var(--accent);font-weight:600;white-space:nowrap;">3 题</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======== 模块3：Offer对比 ======== -->
+    <div class="module" id="module-2">
+        <div class="module-body">
+            <!-- 中间区域：对话 -->
+            <div class="center-area" style="padding:24px;">
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages2">
+                        <div class="chat-message ai">
+                            <div class="chat-avatar">AI</div>
+                            <div class="chat-bubble">
+                                你好！我是你的Offer决策顾问。请把收到的Offer信息告诉我（企业、职位、薪资、福利等），我会帮你从多个维度进行深度对比分析。<br><br>你也可以直接粘贴Offer邮件内容，我会自动提取关键信息。
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chat-input-area">
+                        <textarea class="chat-input" placeholder="输入你的问题或想法..." rows="1" id="chatInput2"></textarea>
+                        <button class="chat-send-btn" onclick="sendMessage(2)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round">
+                                <line x1="12" y1="19" x2="12" y2="5"/>
+                                <polyline points="5 12 12 5 19 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧面板：Offer对比表格 -->
+            <div class="right-panel">
+                <div>
+                    <p class="panel-section-title">Offer 结构化对比</p>
+                    <table class="offer-table" style="margin-top:12px;">
+                        <thead>
+                            <tr>
+                                <th>对比维度</th>
+                                <th>Offer A<br><span style="font-weight:400;font-size:11px;">字节跳动</span></th>
+                                <th>Offer B<br><span style="font-weight:400;font-size:11px;">阿里巴巴</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="dimension">企业职位</td>
+                                <td>高级产品经理</td>
+                                <td>高级产品经理</td>
+                            </tr>
+                            <tr>
+                                <td class="dimension">工作地点</td>
+                                <td>北京</td>
+                                <td>杭州</td>
+                            </tr>
+                            <tr>
+                                <td class="dimension">年化总包</td>
+                                <td>45万<span class="offer-highlight warn" style="margin-left:4px;">低7万</span></td>
+                                <td>52万<span class="offer-highlight best" style="margin-left:4px;">最高</span></td>
+                            </tr>
+                            <tr>
+                                <td class="dimension">月薪</td>
+                                <td>30,000/月</td>
+                                <td>32,500/月</td>
+                            </tr>
+                            <tr>
+                                <td class="dimension">预估真实时薪</td>
+                                <td><strong>144元/h</strong></td>
+                                <td><strong>156元/h</strong></td>
+                            </tr>
+                            <tr>
+                                <td class="dimension">五险一金质量</td>
+                                <td><span class="offer-highlight best">全额缴纳</span></td>
+                                <td><span class="offer-highlight warn">最低基数</span></td>
+                            </tr>
+                            <tr>
+                                <td class="dimension">公积金/月<br><span style="font-weight:400;font-size:11px;">(个人+公司)</span></td>
+                                <td><strong>7,200元</strong></td>
+                                <td><strong>约2,800元</strong></td>
+                            </tr>
+                            <tr>
+                                <td class="dimension">年终奖金</td>
+                                <td>3个月（15薪）</td>
+                                <td>4个月（16薪）</td>
+                            </tr>
+                            <tr>
+                                <td class="dimension">简历流通溢价</td>
+                                <td><span class="offer-highlight best">较高</span></td>
+                                <td>中等</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <hr class="divider">
+
+                <div>
+                    <p class="panel-section-title">决策建议</p>
+                    <div class="suggestion-list">
+                        <div class="suggestion-item info">
+                            <p class="suggestion-tag">综合推荐</p>
+                            <p class="suggestion-desc">若看重长期发展与福利保障，<strong>字节跳动</strong>的全额五险一金和扁平文化更适合你。</p>
+                        </div>
+                        <div class="suggestion-item warning">
+                            <p class="suggestion-tag">需要关注</p>
+                            <p class="suggestion-desc">阿里的最低基数缴纳将显著影响你的<strong>公积金积累</strong>和<strong>养老金</strong>水平。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 隐藏的文件上传input -->
+    <input type="file" id="fileResume" accept=".pdf" style="display:none;">
+    <input type="file" id="fileJD" accept=".png,.jpg,.jpeg,.webp,.bmp,.pdf" style="display:none;">
+    <input type="file" id="fileInterviewResume" accept=".pdf" style="display:none;">
+    <input type="file" id="fileInterviewJD" accept=".png,.jpg,.jpeg,.webp,.bmp,.pdf" style="display:none;">
+
+    <script>
+        // ======== 状态管理 ========
+        const API_BASE = 'http://localhost:3000';
+        const state = {
+            resumeText: '',
+            jdText: '',
+            chatHistory1: [],
+            chatHistory2: [],
+            isAnalyzing: false,
+        };
+
+        // ======== API 工具函数 ========
+        async function apiPost(endpoint, data) {
+            const res = await fetch(API_BASE + endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({ error: '请求失败' }));
+                throw new Error(err.error || '服务器错误');
+            }
+            return res.json();
+        }
+
+        async function uploadFile(file, typeLabel) {
+            const formData = new FormData();
+            formData.append('file', file);
+            const res = await fetch(API_BASE + '/api/parse-file', {
+                method: 'POST',
+                body: formData,
+            });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({ error: '解析失败' }));
+                throw new Error(err.error || '文件解析失败');
+            }
+            return res.json();
+        }
+
+        // ======== 文件上传处理 ========
+        function setupUploadZone(zoneSelector, inputId, typeKey, label) {
+            const zone = document.querySelector(zoneSelector);
+            const input = document.getElementById(inputId);
+            if (!zone || !input) return;
+
+            zone.addEventListener('click', () => input.click());
+
+            input.addEventListener('change', async () => {
+                const file = input.files[0];
+                if (!file) return;
+
+                // Show loading
+                const origHTML = zone.innerHTML;
+                zone.innerHTML = `<div class="upload-icon-circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0B57D0" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><span class="upload-text">解析中...</span>`;
+                zone.classList.add('uploaded');
+
+                try {
+                    const result = await uploadFile(file, label);
+                    if (typeKey === 'resume') {
+                        state.resumeText = result.text;
+                    } else if (typeKey === 'jd') {
+                        state.jdText = result.text;
+                    } else if (typeKey === 'interviewResume') {
+                        state.resumeText = result.text;
+                    } else if (typeKey === 'interviewJD') {
+                        state.jdText = result.text;
+                    }
+
+                    // Update UI
+                    zone.innerHTML = `
+                        <div class="upload-icon-circle">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0B57D0" stroke-width="2" stroke-linecap="round">
+                                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                        </div>
+                        <span class="upload-file-name">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+                            ${escapeHtml(file.name)}
+                        </span>
+                        <span class="upload-text" style="font-size:13px;">${result.length} 字符 · ${result.type === 'image' ? '图片OCR识别' : 'PDF解析'}</span>
+                    `;
+                    zone.classList.add('uploaded');
+
+                    // Auto-analyze if both resume and JD are ready in module 0
+                    if (typeKey === 'resume' || typeKey === 'jd') {
+                        if (state.resumeText && state.jdText && !state.isAnalyzing) {
+                            await analyzeResume();
+                        }
+                    }
+                } catch (err) {
+                    zone.innerHTML = origHTML;
+                    zone.classList.remove('uploaded');
+                    alert('文件解析失败：' + err.message);
+                }
+            });
+        }
+
+        // ======== 简历分析 ========
+        async function analyzeResume() {
+            if (!state.resumeText || !state.jdText) return;
+            state.isAnalyzing = true;
+
+            // Show loading state
+            document.getElementById('scoreValue').textContent = '...';
+            document.getElementById('scoreLabel').textContent = '分析中';
+            document.getElementById('compareList').innerHTML = '<div style="font-size:14px;color:var(--text-tertiary);text-align:center;padding:20px;">AI 正在分析...</div>';
+            document.getElementById('suggestionList').innerHTML = '<div style="font-size:14px;color:var(--text-tertiary);text-align:center;padding:20px;">AI 正在生成建议...</div>';
+
+            try {
+                const result = await apiPost('/api/resume/analyze', {
+                    resumeText: state.resumeText,
+                    jdText: state.jdText,
+                });
+
+                renderMatchScore(result.score);
+                renderCompareList(result.comparison);
+                renderSuggestions(result.suggestions);
+                renderOptimizedResume(result.optimizedResume, result.score);
+            } catch (err) {
+                document.getElementById('scoreValue').textContent = '--';
+                document.getElementById('scoreLabel').textContent = '分析失败';
+                alert('简历分析失败：' + err.message);
+            } finally {
+                state.isAnalyzing = false;
+            }
+        }
+
+        // ======== 动态渲染函数 ========
+        function renderMatchScore(score) {
+            const circle = document.getElementById('scoreFgCircle');
+            const circumference = 377; // 2*PI*60
+            const offset = circumference - (score / 100) * circumference;
+            circle.setAttribute('stroke-dashoffset', offset);
+
+            document.getElementById('scoreValue').textContent = score + '%';
+            let label = '等待分析';
+            if (score >= 85) label = '高度匹配';
+            else if (score >= 70) label = '较为匹配';
+            else if (score >= 50) label = '部分匹配';
+            else label = '匹配度较低';
+            document.getElementById('scoreLabel').textContent = label;
+        }
+
+        function renderCompareList(comparison) {
+            const container = document.getElementById('compareList');
+            if (!comparison || !comparison.length) {
+                container.innerHTML = '<div style="font-size:14px;color:var(--text-tertiary);text-align:center;padding:20px;">暂无数据</div>';
+                return;
+            }
+
+            const statusMap = {
+                full: { cls: 'full', icon: '✓ 完全匹配' },
+                partial: { cls: 'partial', icon: '△ 勉强及格' },
+                missing: { cls: 'missing', icon: '✗ 缺失' },
+            };
+
+            container.innerHTML = comparison.map(item => {
+                const s = statusMap[item.status] || statusMap.partial;
+                let detailHTML = escapeHtml(item.detail);
+                // For skills, wrap pairs
+                if (item.element === '岗位技能') {
+                    const pairs = item.detail.split(/\s+/).filter(Boolean);
+                    detailHTML = pairs.map(p =>
+                        `<span class="skill-pair">${escapeHtml(p)}</span>`
+                    ).join('');
+                }
+                return `
+                    <div class="compare-item">
+                        <span class="compare-label">${escapeHtml(item.element)}</span>
+                        <div style="text-align:right;">
+                            <span class="match-status ${s.cls}">${s.icon}</span>
+                            <div class="compare-detail${item.element === '岗位技能' ? ' skills' : ''}">${detailHTML}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderSuggestions(suggestions) {
+            const container = document.getElementById('suggestionList');
+            if (!suggestions) {
+                container.innerHTML = '<div style="font-size:14px;color:var(--text-tertiary);text-align:center;padding:20px;">暂无建议</div>';
+                return;
+            }
+
+            const parts = [];
+            if (suggestions.missing && suggestions.missing.length) {
+                parts.push(...suggestions.missing.map(t =>
+                    `<div class="suggestion-item danger"><p class="suggestion-tag">缺失点</p><p class="suggestion-desc">${escapeHtml(t)}</p></div>`
+                ));
+            }
+            if (suggestions.supplement && suggestions.supplement.length) {
+                parts.push(...suggestions.supplement.map(t =>
+                    `<div class="suggestion-item warning"><p class="suggestion-tag">需补充点</p><p class="suggestion-desc">${escapeHtml(t)}</p></div>`
+                ));
+            }
+            if (suggestions.risks && suggestions.risks.length) {
+                parts.push(...suggestions.risks.map(t =>
+                    `<div class="suggestion-item info"><p class="suggestion-tag">风险</p><p class="suggestion-desc">${escapeHtml(t)}</p></div>`
+                ));
+            }
+
+            container.innerHTML = parts.length ? parts.join('') : '<div style="font-size:14px;color:var(--text-tertiary);text-align:center;padding:20px;">暂无建议</div>';
+        }
+
+        function renderOptimizedResume(text, score) {
+            const preview = document.getElementById('resumePreview');
+            const title = document.getElementById('resumePreviewTitle');
+            const content = document.getElementById('resumePreviewContent');
+
+            if (!text) {
+                preview.style.display = 'none';
+                return;
+            }
+
+            preview.style.display = 'block';
+            title.innerHTML = '匹配度 <strong style="color:#0B57D0;">' + score + '%</strong>';
+
+            // Convert markdown-style to HTML, highlight 【】 wrapped text
+            let html = escapeHtml(text)
+                .replace(/【(.+?)】/g, '<span class="resume-highlight-diff">$1</span>')
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br>');
+
+            content.innerHTML = html;
+        }
+
+        // ======== 模块切换 ========
+        const navItems = document.querySelectorAll('.nav-item');
+        const modules = document.querySelectorAll('.module');
+
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const moduleIndex = parseInt(item.getAttribute('data-module'));
+
+                // 更新导航状态
+                navItems.forEach(n => n.classList.remove('active'));
+                item.classList.add('active');
+
+                // 更新模块显示
+                modules.forEach(m => m.classList.remove('active'));
+                modules[moduleIndex].classList.add('active');
+            });
+        });
+
+        // ======== 对话发送（接入API） ========
+        function addChatMessage(moduleNum, role, content) {
+            const messagesId = 'chatMessages' + moduleNum;
+            const messages = document.getElementById(messagesId);
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'chat-message ' + role;
+            const avatar = role === 'user' ? 'H' : 'AI';
+            msgDiv.innerHTML = `
+                <div class="chat-avatar">${avatar}</div>
+                <div class="chat-bubble">${content.replace(/\n/g, '<br>')}</div>
+            `;
+            messages.appendChild(msgDiv);
+            messages.scrollTop = messages.scrollHeight;
+            return msgDiv;
+        }
+
+        function addLoadingBubble(moduleNum) {
+            const messagesId = 'chatMessages' + moduleNum;
+            const messages = document.getElementById(messagesId);
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'chat-message ai';
+            loadingDiv.id = 'loadingBubble';
+            loadingDiv.innerHTML = `
+                <div class="chat-avatar">AI</div>
+                <div class="chat-bubble" style="display:flex;gap:4px;padding:16px 24px;">
+                    <span class="loading-dot" style="width:8px;height:8px;border-radius:50%;background:#BABABA;animation:bounce 1.4s infinite ease-in-out;"></span>
+                    <span class="loading-dot" style="width:8px;height:8px;border-radius:50%;background:#BABABA;animation:bounce 1.4s infinite ease-in-out 0.2s;"></span>
+                    <span class="loading-dot" style="width:8px;height:8px;border-radius:50%;background:#BABABA;animation:bounce 1.4s infinite ease-in-out 0.4s;"></span>
+                </div>
+            `;
+            messages.appendChild(loadingDiv);
+            messages.scrollTop = messages.scrollHeight;
+            return loadingDiv;
+        }
+
+        function removeLoadingBubble() {
+            const lb = document.getElementById('loadingBubble');
+            if (lb) lb.remove();
+        }
+
+        async function sendMessage(moduleNum) {
+            const inputId = 'chatInput' + moduleNum;
+            const input = document.getElementById(inputId);
+            const text = input.value.trim();
+            if (!text) return;
+
+            // Add user message
+            addChatMessage(moduleNum, 'user', escapeHtml(text));
+
+            // Update chat history
+            const historyKey = moduleNum === 1 ? 'chatHistory1' : 'chatHistory2';
+            state[historyKey].push({ role: 'user', content: text });
+
+            // Clear input
+            input.value = '';
+            input.style.height = 'auto';
+
+            // Show loading
+            const sendBtn = input.parentElement.querySelector('.chat-send-btn');
+            if (sendBtn) sendBtn.disabled = true;
+            addLoadingBubble(moduleNum);
+
+            try {
+                let result;
+                if (moduleNum === 1) {
+                    result = await apiPost('/api/interview/chat', {
+                        messages: state.chatHistory1,
+                        resumeText: state.resumeText,
+                        jdText: state.jdText,
+                    });
+                } else {
+                    result = await apiPost('/api/offer/chat', {
+                        messages: state.chatHistory2,
+                    });
+                }
+
+                removeLoadingBubble();
+                const replyHTML = result.reply.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+                addChatMessage(moduleNum, 'ai', replyHTML);
+                state[historyKey].push({ role: 'assistant', content: result.reply });
+            } catch (err) {
+                removeLoadingBubble();
+                addChatMessage(moduleNum, 'ai', '抱歉，请求失败：' + err.message);
+            } finally {
+                if (sendBtn) sendBtn.disabled = false;
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ======== 输入框自动调整高度 ========
+        document.querySelectorAll('.chat-input').forEach(textarea => {
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            });
+
+            textarea.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    const moduleNum = this.id === 'chatInput1' ? 1 : 2;
+                    sendMessage(moduleNum);
+                }
+            });
+        });
+
+        // ======== 初始化上传区域 ========
+        setupUploadZone('.dual-upload-item:first-child', 'fileResume', 'resume', '简历');
+        setupUploadZone('.dual-upload-item:last-child', 'fileJD', 'jd', '岗位JD');
+        setupUploadZone('#uploadInterviewResume', 'fileInterviewResume', 'interviewResume', '简历');
+        setupUploadZone('#uploadInterviewJD', 'fileInterviewJD', 'interviewJD', '岗位JD');
+
+        // ======== 初始化对话历史（AI开场白） ========
+        state.chatHistory1 = [];
+        state.chatHistory2 = [];
+    </script>
+</body>
+</html>
