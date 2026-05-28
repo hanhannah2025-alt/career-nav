@@ -171,10 +171,38 @@
             padding: 40px;
         }
 
+        /* ======== 拖动分隔条 ======== */
+        .resize-handle {
+            width: 6px;
+            min-width: 6px;
+            height: 100vh;
+            cursor: col-resize;
+            background: transparent;
+            transition: background 0.2s;
+            position: relative;
+            z-index: 20;
+            flex-shrink: 0;
+        }
+
+        .resize-handle:hover,
+        .resize-handle.active {
+            background: var(--accent);
+        }
+
+        .resize-handle::after {
+            content: '';
+            position: absolute;
+            left: -4px;
+            right: -4px;
+            top: 0;
+            bottom: 0;
+        }
+
         /* ======== 右侧面板 ======== */
         .right-panel {
             width: var(--right-panel-width);
-            min-width: var(--right-panel-width);
+            min-width: 280px;
+            max-width: 600px;
             height: 100vh;
             background: var(--surface);
             border-left: 1px solid var(--border);
@@ -191,6 +219,109 @@
             color: var(--text);
             letter-spacing: 1px;
             margin-bottom: 4px;
+        }
+
+        .panel-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+
+        .panel-title-row .panel-section-title {
+            margin-bottom: 0;
+        }
+
+        .offer-col-btn {
+            font-size: 12px;
+            color: var(--accent);
+            background: none;
+            border: 1px solid var(--accent);
+            border-radius: 14px;
+            padding: 3px 10px;
+            cursor: pointer;
+            font-family: inherit;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .offer-col-btn:hover {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .offer-analyze-btn {
+            background: var(--accent);
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .offer-analyze-btn:hover {
+            background: #0952B5;
+            border-color: #0952B5;
+        }
+
+        .offer-col-remove {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(0,0,0,0.04);
+            color: var(--text-tertiary);
+            cursor: pointer;
+            font-size: 14px;
+            line-height: 18px;
+            text-align: center;
+            padding: 0;
+            display: none;
+            flex-shrink: 0;
+        }
+
+        .offer-table th:hover .offer-col-remove {
+            display: inline-block;
+        }
+
+        .offer-col-remove:hover {
+            background: #fdd;
+            color: var(--danger);
+        }
+
+        .offer-table th {
+            position: relative;
+        }
+
+        .offer-company-edit {
+            display: inline-block;
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            vertical-align: middle;
+            padding: 1px 4px;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .offer-company-edit:focus {
+            background: rgba(11, 87, 208, 0.06);
+            max-width: none;
+            overflow: visible;
+            white-space: normal;
+        }
+
+        .offer-table td[contenteditable]:focus {
+            overflow: visible;
+            white-space: normal;
+            max-width: none;
+            background: rgba(11, 87, 208, 0.04);
+            outline: 2px solid var(--accent);
+            outline-offset: -2px;
+            border-radius: 3px;
+            position: relative;
+            z-index: 1;
         }
 
         /* ======== 上传区域 ======== */
@@ -863,29 +994,38 @@
         }
 
         /* ======== Offer对比表格 ======== */
+        #offerTableContainer {
+            overflow-x: auto;
+        }
+
         .offer-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 14px;
+            table-layout: auto;
+            min-width: max-content;
         }
 
         .offer-table th {
             text-align: left;
-            padding: 12px 14px;
+            padding: 12px 10px;
             font-size: 13px;
             font-weight: 700;
             color: var(--text-secondary);
             letter-spacing: 0.5px;
             border-bottom: 2px solid var(--border);
             white-space: nowrap;
+            max-width: 120px;
         }
 
         .offer-table td {
-            padding: 14px;
+            padding: 12px 10px;
             border-bottom: 1px solid #F0EDE8;
             color: var(--text);
             line-height: 1.5;
-            white-space: nowrap;
+            max-width: 140px;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .offer-table .dimension {
@@ -893,6 +1033,7 @@
             font-size: 13px;
             color: var(--text-secondary);
             white-space: nowrap;
+            min-width: 72px;
         }
 
         .offer-highlight {
@@ -1376,6 +1517,10 @@
                 padding: 20px;
             }
 
+            .resize-handle {
+                display: none;
+            }
+
             .right-panel {
                 width: 100%;
                 min-width: 100%;
@@ -1653,10 +1798,16 @@
                 </div>
             </div>
 
+            <div class="resize-handle" data-module="2"></div>
+
             <!-- 右侧面板：Offer对比表格 -->
-            <div class="right-panel">
+            <div class="right-panel" id="rightPanel2">
                 <div id="offerTableSection">
-                    <p class="panel-section-title">Offer 结构化对比</p>
+                    <div class="panel-title-row">
+                        <p class="panel-section-title">Offer 结构化对比</p>
+                        <button class="offer-col-btn" id="btnAddOfferCol" title="添加Offer列" onclick="addOfferColumn()">+ 添加Offer</button>
+                        <button class="offer-col-btn offer-analyze-btn" onclick="analyzeManualData()">分析</button>
+                    </div>
                     <div id="offerTableContainer">
                         <p class="placeholder-hint">在左侧输入Offer信息或上传截图，自动生成结构化对比</p>
                     </div>
@@ -2154,8 +2305,12 @@
                         jdText: state.jdText,
                     });
                 } else {
+                    const offerCtx = offersToText();
+                    const chatMessages = offerCtx
+                        ? [{ role: 'system', content: '用户正在对比以下Offer信息（表格中手动填写或分析得到）：\n' + offerCtx }, ...state.chatHistory2]
+                        : state.chatHistory2;
                     result = await apiPost('/api/offer/chat', {
-                        messages: state.chatHistory2,
+                        messages: chatMessages,
                     });
                 }
 
@@ -2365,28 +2520,106 @@
             }
         }
 
-        // ======== Offer 表格渲染 ========
-        function renderOfferTable(data) {
-            if (!data || !data.offers || !data.offers.length) {
-                document.getElementById('offerTableContainer').innerHTML = '<p class="placeholder-hint">未识别到Offer信息</p>';
+        // ======== 手动填写后分析（仅更新前景和建议） ========
+        async function analyzeManualData() {
+            const text = offersToText();
+            if (!text) {
+                alert('请先在表格中填写Offer信息');
                 return;
             }
 
-            const offers = data.offers;
-            const labels = ['A', 'B', 'C', 'D'];
+            const btn = document.querySelector('.offer-analyze-btn');
+            const origText = btn.textContent;
+            btn.textContent = '分析中...';
+            btn.disabled = true;
+
+            try {
+                const result = await apiPost('/api/offer/analyze', { offerTexts: [text] });
+                // Only update outlook and suggestion, keep user's table data
+                if (result.outlook) state.offerData.outlook = result.outlook;
+                if (result.suggestion) state.offerData.suggestion = result.suggestion;
+                // Merge API-extracted fields into user's offers if API returns better data
+                if (result.offers && result.offers.length) {
+                    result.offers.forEach((apiOffer, i) => {
+                        if (!state.offerData.offers[i]) return;
+                        const userOffer = state.offerData.offers[i];
+                        // Only fill empty fields, don't overwrite user's manual input
+                        if (!userOffer.company && apiOffer.company) userOffer.company = apiOffer.company;
+                        if (!userOffer.position && apiOffer.position) userOffer.position = apiOffer.position;
+                        if (!userOffer.location && apiOffer.location) userOffer.location = apiOffer.location;
+                        if ((userOffer.annualPackage == null) && apiOffer.annualPackage) userOffer.annualPackage = apiOffer.annualPackage;
+                        if ((userOffer.monthlySalary == null) && apiOffer.monthlySalary) userOffer.monthlySalary = apiOffer.monthlySalary;
+                        if (!userOffer.workSchedule && apiOffer.workSchedule) userOffer.workSchedule = apiOffer.workSchedule;
+                        if ((userOffer.dailyWorkHours == null) && apiOffer.dailyWorkHours) userOffer.dailyWorkHours = apiOffer.dailyWorkHours;
+                        if (!userOffer.insuranceBase && apiOffer.insuranceBase) userOffer.insuranceBase = apiOffer.insuranceBase;
+                        if ((userOffer.housingFundMonthly == null) && apiOffer.housingFundMonthly) userOffer.housingFundMonthly = apiOffer.housingFundMonthly;
+                        if (!userOffer.bonus && apiOffer.bonus) userOffer.bonus = apiOffer.bonus;
+                        if (!userOffer.resumeValue && apiOffer.resumeValue) userOffer.resumeValue = apiOffer.resumeValue;
+                        if ((userOffer.hourlyRate == null) && apiOffer.hourlyRate) userOffer.hourlyRate = apiOffer.hourlyRate;
+                    });
+                }
+                renderOfferTable(state.offerData);
+                renderOfferOutlook(state.offerData);
+                renderOfferSuggestions(state.offerData);
+            } catch (err) {
+                alert('分析失败：' + err.message);
+            } finally {
+                btn.textContent = origText;
+                btn.disabled = false;
+            }
+        }
+
+        // ======== Offer 表格渲染 ========
+        const OFFER_LABELS = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+        function offersToText() {
+            if (!state.offerData || !state.offerData.offers) return '';
+            return state.offerData.offers.map((o, i) => {
+                const parts = [];
+                if (o.company) parts.push(o.company);
+                if (o.position) parts.push(o.position);
+                if (o.location) parts.push(o.location);
+                if (o.annualPackage) parts.push('年薪' + o.annualPackage + '万');
+                if (o.monthlySalary) parts.push('月薪' + o.monthlySalary);
+                if (o.workSchedule) parts.push(o.workSchedule);
+                if (o.insuranceBase) parts.push('五险一金' + o.insuranceBase);
+                if (o.housingFundMonthly) parts.push('公积金' + o.housingFundMonthly + '/月');
+                if (o.bonus) parts.push(o.bonus);
+                if (o.resumeValue) parts.push('简历溢价' + o.resumeValue);
+                if (parts.length === 0) return null;
+                return parts.join('，');
+            }).filter(Boolean).join('\n');
+        }
+
+        function blankOffer(id) {
+            return { id, company: '', position: '', location: '', annualPackage: null, monthlySalary: null, dailyWorkHours: null, workSchedule: '', insuranceBase: '', housingFundMonthly: null, bonus: '', resumeValue: '', hourlyRate: null };
+        }
+
+        function renderOfferTable(data) {
+            const hasData = data && data.offers && data.offers.length;
+            const offers = hasData ? data.offers : [blankOffer(1), blankOffer(2)];
 
             // Build thead
             let headerCells = '<th>对比维度</th>';
             offers.forEach((o, i) => {
-                headerCells += `<th>Offer ${labels[i]}<br><span style="font-weight:400;font-size:11px;">${escapeHtml(o.company || '未知')}</span></th>`;
+                const label = hasData ? (o.company || 'Offer ' + OFFER_LABELS[i]) : 'Offer ' + OFFER_LABELS[i];
+                let removeBtn = '';
+                if (offers.length > 2) {
+                    removeBtn = `<button class="offer-col-remove" style="display:inline-block;" onclick="removeOfferColumn(${i})" title="删除此列">&times;</button>`;
+                }
+                headerCells += `<th><span contenteditable="true" data-offer="${i}" data-field="company" class="offer-company-edit">${escapeHtml(label)}</span>${removeBtn}</th>`;
             });
             // Highlight best/worst values
             const annualPackages = offers.map(o => o.annualPackage);
             const monthlySalaries = offers.map(o => o.monthlySalary);
             const hourlyRates = offers.map(o => o.hourlyRate);
-            const maxAnnual = Math.max(...annualPackages);
-            const minAnnual = Math.min(...annualPackages);
-            const maxMonthly = Math.max(...monthlySalaries);
+            const validAnnuals = annualPackages.filter(v => v != null);
+            const validMonthlys = monthlySalaries.filter(v => v != null);
+            const validHourlys = hourlyRates.filter(v => v != null && v > 0);
+            const maxAnnual = validAnnuals.length >= 2 ? Math.max(...validAnnuals) : 0;
+            const minAnnual = validAnnuals.length >= 2 ? Math.min(...validAnnuals) : 0;
+            const maxMonthly = validMonthlys.length >= 2 ? Math.max(...validMonthlys) : 0;
+            const maxHourly = validHourlys.length >= 2 ? Math.max(...validHourlys) : 0;
 
             function annualCell(o) {
                 let html = o.annualPackage ? o.annualPackage + '万' : '--';
@@ -2402,8 +2635,6 @@
                 if (offers.length >= 2 && o.monthlySalary === maxMonthly) html += '<span class="offer-highlight best" style="margin-left:4px;">最高</span>';
                 return html;
             }
-
-            const maxHourly = Math.max(...hourlyRates.filter(r => r > 0));
 
             function hourlyCell(o) {
                 if (!o.hourlyRate) return '--';
@@ -2484,15 +2715,63 @@
         }
 
         // ======== Offer 表格编辑同步 ========
-        document.getElementById('offerTableContainer').addEventListener('input', (e) => {
-            const td = e.target.closest('td[contenteditable]');
-            if (!td || !state.offerData) return;
-            const oi = parseInt(td.dataset.offer);
-            const field = td.dataset.field;
+        const offerTable = document.getElementById('offerTableContainer');
+        offerTable.addEventListener('input', (e) => {
+            const el = e.target.closest('[contenteditable]');
+            if (!el || !state.offerData) return;
+            const oi = parseInt(el.dataset.offer);
+            const field = el.dataset.field;
             if (!isNaN(oi) && field && state.offerData.offers[oi]) {
-                state.offerData.offers[oi][field] = td.textContent.trim();
+                state.offerData.offers[oi][field] = el.textContent.trim();
             }
         });
+
+        offerTable.addEventListener('focusin', (e) => {
+            const el = e.target.closest('[contenteditable]');
+            if (!el) return;
+            if (el.textContent.trim() === '--') {
+                el.textContent = '';
+            }
+        });
+
+        offerTable.addEventListener('focusout', (e) => {
+            const el = e.target.closest('[contenteditable]');
+            if (!el || !state.offerData) return;
+            if (el.textContent.trim() === '') {
+                const oi = parseInt(el.dataset.offer);
+                const field = el.dataset.field;
+                if (field === 'company') {
+                    el.textContent = 'Offer ' + (OFFER_LABELS[oi] || '?');
+                } else {
+                    el.textContent = '--';
+                }
+            }
+        });
+
+        // ======== Offer 列管理 ========
+        function addOfferColumn() {
+            if (!state.offerData || !state.offerData.offers) {
+                state.offerData = { offers: [blankOffer(1), blankOffer(2)] };
+            }
+            if (state.offerData.offers.length >= 6) return;
+            state.offerData.offers.push(blankOffer(state.offerData.offers.length + 1));
+            renderOfferTable(state.offerData);
+        }
+
+        function removeOfferColumn(index) {
+            if (!state.offerData || !state.offerData.offers) return;
+            if (state.offerData.offers.length <= 2) return;
+            state.offerData.offers.splice(index, 1);
+            renderOfferTable(state.offerData);
+            renderOfferOutlook(state.offerData);
+            renderOfferSuggestions(state.offerData);
+        }
+
+        // ======== 初始化空白表格 ========
+        function initEmptyOfferTable() {
+            state.offerData = { offers: [blankOffer(1), blankOffer(2)] };
+            renderOfferTable(state.offerData);
+        }
 
         // ======== 输入框自动调整高度 ========
         document.querySelectorAll('.chat-input').forEach(textarea => {
@@ -2515,6 +2794,53 @@
         setupUploadZone('.dual-upload-item:last-child', 'fileJD', 'jd', '岗位JD');
         setupUploadZone('#uploadInterviewResume', 'fileInterviewResume', 'interviewResume', '简历');
         setupUploadZone('#uploadInterviewJD', 'fileInterviewJD', 'interviewJD', '岗位JD');
+
+        // ======== 初始化空白Offer对比表格 ========
+        initEmptyOfferTable();
+
+        // ======== 右侧面板拖拽调整宽度 ========
+        (function initResizeHandle() {
+            let isResizing = false;
+            let startX = 0;
+            let startWidth = 0;
+            let currentPanel = null;
+
+            document.querySelectorAll('.resize-handle').forEach(handle => {
+                handle.addEventListener('mousedown', (e) => {
+                    isResizing = true;
+                    startX = e.clientX;
+                    const moduleBody = handle.parentElement;
+                    currentPanel = moduleBody.querySelector('.right-panel');
+                    if (currentPanel) {
+                        startWidth = currentPanel.getBoundingClientRect().width;
+                        handle.classList.add('active');
+                    }
+                    document.body.style.cursor = 'col-resize';
+                    document.body.style.userSelect = 'none';
+                    e.preventDefault();
+                });
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isResizing || !currentPanel) return;
+                const delta = startX - e.clientX;
+                const newWidth = Math.min(600, Math.max(280, startWidth + delta));
+                currentPanel.style.width = newWidth + 'px';
+                currentPanel.style.minWidth = newWidth + 'px';
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (!isResizing) return;
+                isResizing = false;
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+                if (currentPanel) {
+                    const handle = currentPanel.parentElement.querySelector('.resize-handle');
+                    if (handle) handle.classList.remove('active');
+                }
+                currentPanel = null;
+            });
+        })();
 
         // ======== 初始化对话历史（AI开场白） ========
         state.chatHistory1 = [];
