@@ -10,7 +10,7 @@
             --text: #000000;
             --accent: #0B57D0;
             --sidebar-width: 200px;
-            --sidebar-gap: 50px;
+            --sidebar-gap: 20px;
             --font-size: 16px;
             --right-panel-width: 380px;
             --border: #E5E0DA;
@@ -197,6 +197,7 @@
 
         .sidebar-history-title svg path,
         .sidebar-history-title svg line,
+        .sidebar-history-title svg circle,
         .sidebar-history-title svg polyline {
             stroke: var(--text);
             transition: stroke 0.25s ease;
@@ -204,6 +205,7 @@
 
         .sidebar-history-title:hover svg path,
         .sidebar-history-title:hover svg line,
+        .sidebar-history-title:hover svg circle,
         .sidebar-history-title:hover svg polyline {
             stroke: var(--accent);
         }
@@ -247,27 +249,100 @@
         }
 
         .history-item {
-            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 10px;
             border-radius: 8px;
             cursor: pointer;
             font-size: 12px;
             color: var(--text-secondary);
-            line-height: 1.4;
             transition: all 0.2s;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            position: relative;
         }
 
         .history-item:hover {
             background: var(--hover-bg);
         }
 
-        .history-item .history-time {
-            font-size: 10px;
+        .history-item-text {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .history-item-dots {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
             color: var(--text-tertiary);
+            letter-spacing: 1px;
+            flex-shrink: 0;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .history-item-dots:hover {
+            background: #E8E4DF;
+            color: var(--text);
+        }
+
+        .history-dropdown {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            margin-top: 4px;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            z-index: 50;
+            min-width: 100px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .history-dropdown.show {
             display: block;
-            margin-top: 2px;
+        }
+
+        .history-dropdown-item {
+            padding: 8px 14px;
+            font-size: 12px;
+            color: var(--text);
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+
+        .history-dropdown-item:hover {
+            background: var(--hover-bg);
+        }
+
+        .history-dropdown-item.danger {
+            color: var(--danger);
+        }
+
+        .history-rename-input {
+            padding: 6px 8px;
+            font-size: 12px;
+            border: 1px solid var(--accent);
+            border-radius: 4px;
+            outline: none;
+            width: 100%;
+            font-family: inherit;
         }
 
         .history-empty {
@@ -1899,7 +1974,7 @@
         <div class="sidebar-history" id="sidebarHistory">
             <div class="sidebar-history-title expanded" id="historyTitle" onclick="toggleHistory()" title="展开/收起历史记录">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
+                    <circle cx="12" cy="12" r="9"/>
                     <polyline points="12 6 12 12 16 14"/>
                 </svg>
                 <span class="history-label">历史记录</span>
@@ -2224,6 +2299,8 @@
         const state = {
             resumeText: '',
             jdText: '',
+            resumeFileName: '',
+            jdFileName: '',
             optimizedResumeText: '',
             chatHistory1: [],
             chatHistory2: [],
@@ -2232,6 +2309,8 @@
             interviewPredict: null,
             practicedCount: 0,
             offerData: null,
+            lastAnalysis: null,
+            optimizeReport: null,
         };
 
         // ======== API 工具函数 ========
@@ -2283,12 +2362,16 @@
                     const result = await uploadFile(file, label);
                     if (typeKey === 'resume') {
                         state.resumeText = result.text;
+                        state.resumeFileName = file.name;
                     } else if (typeKey === 'jd') {
                         state.jdText = result.text;
+                        state.jdFileName = file.name;
                     } else if (typeKey === 'interviewResume') {
                         state.resumeText = result.text;
+                        state.resumeFileName = file.name;
                     } else if (typeKey === 'interviewJD') {
                         state.jdText = result.text;
+                        state.jdFileName = file.name;
                     }
 
                     // Update UI
@@ -2349,6 +2432,7 @@
                 });
 
                 document.getElementById('scoreFgCircle').classList.remove('loading-ring');
+                state.lastAnalysis = result;
                 renderMatchScore(result.score);
                 renderCompareList(result.comparison);
                 renderSuggestions(result.suggestions);
@@ -2390,8 +2474,13 @@
                     resumeText: state.resumeText,
                     jdText: state.jdText,
                 });
+                state.optimizeReport = result.report;
+                state.optimizedResumeText = result.optimizedResume;
                 renderOptimizeReport(result.report);
                 renderOptimizedResume(result.optimizedResume);
+                const jdTitle = state.jdText.slice(0, 30).replace(/\n/g, ' ');
+                addHistoryEntry(0, '简历优化 · ' + jdTitle, []);
+                renderHistory();
             } catch (err) {
                 document.getElementById('resumePreview').style.display = 'none';
                 status.textContent = '';
@@ -2714,6 +2803,9 @@
                 if (moduleNum === 1 && state.interviewPredict) {
                     updateInterviewProgress();
                 }
+
+                // Update history snapshot with latest chat content
+                updateHistorySnapshot(moduleNum);
             } catch (err) {
                 removeLoadingBubble();
                 addChatMessage(moduleNum, 'ai', '抱歉，请求失败：' + err.message);
@@ -2761,6 +2853,9 @@
                 document.getElementById('predictAction').style.display = 'none';
                 document.getElementById('predictQuestionList').style.display = 'block';
                 document.getElementById('startInterviewAction').style.display = 'block';
+                const posTitle = result.interviewInfo?.position || result.interviewInfo?.company || '面试';
+                addHistoryEntry(1, '面试预测 · ' + posTitle, []);
+                renderHistory();
             } catch (err) {
                 alert('预测失败：' + err.message);
                 btn.classList.remove('loading');
@@ -2814,7 +2909,7 @@
 
             // Build a structured prompt to start the interview
             const qList = questions.map((q, i) => `${i + 1}. [${q.category}] ${q.question}`).join('\n');
-            const startMsg = `以下是预测的面试题列表，请以毒舌面试官身份，从第1题开始提问。\n\n预测面试题：\n${qList}`;
+            const startMsg = `开始模拟面试。请以毒舌面试官身份，直接抛出第1个问题（只提问，不要点评）。\n\n参考题库：\n${qList}`;
 
             // Add as user message and trigger send
             addChatMessage(1, 'user', '开始模拟面试');
@@ -2903,6 +2998,9 @@
                 renderOfferOutlook(result);
                 renderOfferSuggestions(result);
                 renderOfferCompany(result);
+                const offerTitle = result.offers?.map(o => o.company).filter(Boolean).join(' vs ') || 'Offer';
+                addHistoryEntry(2, 'Offer对比 · ' + offerTitle, []);
+                renderHistory();
             } catch (err) {
                 document.getElementById('offerTableContainer').innerHTML = '<p class="placeholder-hint">分析失败：' + escapeHtml(err.message) + '</p>';
             }
@@ -3225,15 +3323,68 @@
             localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
         }
 
-        function addHistoryEntry(module, title, messages) {
+        function addHistoryEntry(module, title) {
             const list = loadHistory();
+            const snap = { module };
+            if (module === 0) {
+                snap.resumeText = state.resumeText;
+                snap.jdText = state.jdText;
+                snap.resumeFileName = state.resumeFileName;
+                snap.jdFileName = state.jdFileName;
+                snap.lastAnalysis = state.lastAnalysis;
+                snap.optimizeReport = state.optimizeReport;
+                snap.optimizedResumeText = state.optimizedResumeText;
+            } else if (module === 1) {
+                snap.resumeText = state.resumeText;
+                snap.jdText = state.jdText;
+                snap.resumeFileName = state.resumeFileName;
+                snap.jdFileName = state.jdFileName;
+                snap.chatHistory1 = state.chatHistory1.map(m => ({ role: m.role, content: m.content }));
+                snap.chatHTML = document.getElementById('chatMessages1')?.innerHTML || '';
+                snap.interviewPredict = state.interviewPredict;
+                snap.practicedCount = state.practicedCount;
+            } else if (module === 2) {
+                snap.chatHistory2 = state.chatHistory2.map(m => ({ role: m.role, content: m.content }));
+                snap.chatHTML = document.getElementById('chatMessages2')?.innerHTML || '';
+                snap.offerData = state.offerData;
+            }
             list.push({
                 id: Date.now(),
                 module,
                 title: title.slice(0, 40),
-                messages: messages.slice(-2), // keep first user + last AI reply
+                snapshot: snap,
                 time: new Date().toISOString()
             });
+            saveHistory(list);
+            renderHistory();
+        }
+
+        function updateHistorySnapshot(module) {
+            const list = loadHistory();
+            // Find the most recent entry for this module
+            let entry = null;
+            for (let i = list.length - 1; i >= 0; i--) {
+                if (list[i].module === module) { entry = list[i]; break; }
+            }
+            if (!entry) {
+                // Create a new entry if none exists
+                const moduleTitles = ['简历', '面试', 'Offer'];
+                addHistoryEntry(module, moduleTitles[module] + '对话 · ' + new Date().toLocaleTimeString());
+                return;
+            }
+            const snap = entry.snapshot || { module };
+            if (module === 1) {
+                snap.chatHistory1 = state.chatHistory1.map(m => ({ role: m.role, content: m.content }));
+                snap.chatHTML = document.getElementById('chatMessages1')?.innerHTML || '';
+                snap.interviewPredict = state.interviewPredict;
+                snap.practicedCount = state.practicedCount;
+            } else if (module === 2) {
+                snap.chatHistory2 = state.chatHistory2.map(m => ({ role: m.role, content: m.content }));
+                snap.chatHTML = document.getElementById('chatMessages2')?.innerHTML || '';
+                snap.offerData = state.offerData;
+            }
+            entry.snapshot = snap;
+            entry.time = new Date().toISOString();
             saveHistory(list);
             renderHistory();
         }
@@ -3263,35 +3414,152 @@
                 const d = new Date(h.time);
                 const timeStr = (d.getMonth() + 1) + '/' + d.getDate() + ' ' +
                     String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
-                return '<div class="history-item" data-id="' + h.id + '" onclick="loadHistoryEntry(' + h.id + ')" title="' + escapeHtml(h.title) + '">' +
-                    escapeHtml(h.title || '(空)') +
-                    '<span class="history-time">' + moduleNames[h.module] + ' · ' + timeStr + '</span></div>';
+                return '<div class="history-item" title="' + escapeHtml(moduleNames[h.module] + ' · ' + timeStr + '\n' + h.title) + '">' +
+                    '<span class="history-item-text" onclick="loadHistoryEntry(' + h.id + ')">' + escapeHtml(h.title || '(空)') + '</span>' +
+                    '<button class="history-item-dots" onclick="event.stopPropagation();toggleHistoryMenu(event,' + h.id + ')" title="更多操作">⋯</button>' +
+                    '<div class="history-dropdown" id="menu' + h.id + '">' +
+                        '<button class="history-dropdown-item" onclick="event.stopPropagation();renameHistory(' + h.id + ')">重命名</button>' +
+                        '<button class="history-dropdown-item danger" onclick="event.stopPropagation();deleteHistory(' + h.id + ')">删除</button>' +
+                    '</div>' +
+                    '</div>';
             }).join('');
         }
 
-        let _historyLoading = false;
+        let _openMenuId = null;
+
+        function toggleHistoryMenu(e, id) {
+            // Close any open menu
+            if (_openMenuId && _openMenuId !== id) {
+                const prev = document.getElementById('menu' + _openMenuId);
+                if (prev) prev.classList.remove('show');
+            }
+            const menu = document.getElementById('menu' + id);
+            if (menu) {
+                menu.classList.toggle('show');
+                _openMenuId = menu.classList.contains('show') ? id : null;
+            }
+        }
+
+        function renameHistory(id) {
+            const list = loadHistory();
+            const entry = list.find(h => h.id === id);
+            if (!entry) return;
+            const newTitle = prompt('重命名历史记录：', entry.title);
+            if (newTitle && newTitle.trim()) {
+                entry.title = newTitle.trim().slice(0, 40);
+                saveHistory(list);
+                renderHistory();
+            }
+        }
+
+        function deleteHistory(id) {
+            if (!confirm('确定删除这条历史记录？')) return;
+            let list = loadHistory();
+            list = list.filter(h => h.id !== id);
+            saveHistory(list);
+            _openMenuId = null;
+            renderHistory();
+        }
 
         function loadHistoryEntry(id) {
             const list = loadHistory();
             const entry = list.find(h => h.id === id);
-            if (!entry) return;
+            if (!entry || !entry.snapshot) return;
+            const snap = entry.snapshot;
+
             // Switch to that module
             const navItems = document.querySelectorAll('.nav-item');
             navItems.forEach(n => n.classList.remove('active'));
-            const target = document.querySelector('.nav-item[data-module="' + entry.module + '"]');
+            const target = document.querySelector('.nav-item[data-module="' + snap.module + '"]');
             if (target) target.classList.add('active');
             const modules = document.querySelectorAll('.module');
             modules.forEach(m => m.classList.remove('active'));
-            modules[entry.module].classList.add('active');
-            // Restore messages without recording to history
-            const messagesId = 'chatMessages' + (entry.module === 2 ? 2 : (entry.module === 1 ? 1 : 0));
-            const messagesEl = document.getElementById(messagesId);
-            if (messagesEl && entry.messages) {
-                _historyLoading = true;
-                messagesEl.innerHTML = '';
-                entry.messages.forEach(m => origAddChatMessage(entry.module === 2 ? 2 : (entry.module === 1 ? 1 : 0), m.role, m.content));
-                _historyLoading = false;
+            modules[snap.module].classList.add('active');
+            // Restore state and re-render
+            if (snap.module === 0) {
+                state.resumeText = snap.resumeText || '';
+                state.jdText = snap.jdText || '';
+                state.resumeFileName = snap.resumeFileName || '';
+                state.jdFileName = snap.jdFileName || '';
+                state.lastAnalysis = snap.lastAnalysis || null;
+                state.optimizeReport = snap.optimizeReport || null;
+                state.optimizedResumeText = snap.optimizedResumeText || '';
+                restoreUploadZones();
+                if (snap.lastAnalysis) {
+                    renderMatchScore(snap.lastAnalysis.score);
+                    renderCompareList(snap.lastAnalysis.comparison);
+                    renderSuggestions(snap.lastAnalysis.suggestions);
+                    document.getElementById('optimizeAction').style.display = 'block';
+                }
+                if (snap.optimizeReport) {
+                    renderOptimizeReport(snap.optimizeReport);
+                }
+                if (snap.optimizedResumeText) {
+                    renderOptimizedResume(snap.optimizedResumeText);
+                }
+            } else if (snap.module === 1) {
+                state.resumeText = snap.resumeText || '';
+                state.jdText = snap.jdText || '';
+                state.resumeFileName = snap.resumeFileName || '';
+                state.jdFileName = snap.jdFileName || '';
+                state.chatHistory1 = snap.chatHistory1 || [];
+                state.interviewPredict = snap.interviewPredict || null;
+                state.practicedCount = snap.practicedCount || 0;
+                restoreInterviewUploadZones();
+                document.getElementById('chatMessages1').innerHTML = snap.chatHTML || '';
+                if (snap.interviewPredict) {
+                    renderPredictResult(snap.interviewPredict);
+                    document.getElementById('predictAction').style.display = 'none';
+                    document.getElementById('predictQuestionList').style.display = 'block';
+                    document.getElementById('startInterviewAction').style.display = 'block';
+                }
+                if (snap.resumeText && snap.jdText) {
+                    checkInterviewReady();
+                }
+            } else if (snap.module === 2) {
+                state.chatHistory2 = snap.chatHistory2 || [];
+                state.offerData = snap.offerData || null;
+                document.getElementById('chatMessages2').innerHTML = snap.chatHTML || '';
+                if (snap.offerData) {
+                    renderOfferTable(snap.offerData);
+                    renderOfferOutlook(snap.offerData);
+                    renderOfferSuggestions(snap.offerData);
+                    renderOfferCompany(snap.offerData);
+                }
             }
+        }
+
+        function restoreUploadZones() {
+            const zones = [
+                { sel: '.dual-upload-item:first-child', hasText: state.resumeText, name: state.resumeFileName, length: state.resumeText.length },
+                { sel: '.dual-upload-item:last-child', hasText: state.jdText, name: state.jdFileName, length: state.jdText.length },
+            ];
+            zones.forEach(z => {
+                const el = document.querySelector(z.sel);
+                if (!el) return;
+                if (z.hasText && z.name) {
+                    el.innerHTML = `<div class="upload-icon-circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0B57D0" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><span class="upload-file-name"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>${escapeHtml(z.name)}</span><span class="upload-text" style="font-size:13px;">${z.length} 字符</span>`;
+                    el.classList.add('uploaded');
+                }
+            });
+        }
+
+        function restoreInterviewUploadZones() {
+            const zones = [
+                { id: 'uploadInterviewResume', name: state.resumeFileName, hasText: state.resumeText },
+                { id: 'uploadInterviewJD', name: state.jdFileName, hasText: state.jdText },
+            ];
+            zones.forEach(z => {
+                const el = document.getElementById(z.id);
+                if (!el) return;
+                if (z.hasText && z.name) {
+                    el.innerHTML = `<div class="upload-icon-circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0B57D0" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><span class="upload-file-name"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>${escapeHtml(z.name)}</span><span class="upload-text" style="font-size:13px;">${z.hasText.length} 字符</span>`;
+                    el.classList.add('uploaded');
+                    // Also hide the placeholder text
+                    const placeholder = el.querySelector('.upload-placeholder');
+                    if (placeholder) placeholder.style.display = 'none';
+                }
+            });
         }
 
         renderHistory();
@@ -3415,28 +3683,17 @@
         // Close modal on overlay click
         document.getElementById('loginModal').addEventListener('click', closeLogin);
 
+        // Close history dropdown on outside click
+        document.addEventListener('click', () => {
+            if (_openMenuId) {
+                const menu = document.getElementById('menu' + _openMenuId);
+                if (menu) menu.classList.remove('show');
+                _openMenuId = null;
+            }
+        });
+
         renderUser();
 
-        // Hook: save history on chat messages
-        const origAddChatMessage = addChatMessage;
-        addChatMessage = function(moduleNum, role, content) {
-            const result = origAddChatMessage(moduleNum, role, content);
-            if (_historyLoading) return result;
-            if (role === 'user') {
-                addHistoryEntry(moduleNum, content, []);
-            }
-            if (role === 'ai') {
-                const list = loadHistory();
-                if (list.length) {
-                    const last = list[list.length - 1];
-                    if (!last.messages) last.messages = [];
-                    last.messages.push({ role, content });
-                    saveHistory(list);
-                    renderHistory();
-                }
-            }
-            return result;
-        };
     </script>
 </body>
 </html>
